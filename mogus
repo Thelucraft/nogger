@@ -1,0 +1,252 @@
+local TextChatService = game:GetService("TextChatService")
+local HttpService = game:GetService("HttpService")
+local LocalPlayer = game.Players.LocalPlayer
+local HumanoidRootPart = LocalPlayer.Character.HumanoidRootPart
+local channel
+local mode
+local HAUPT_GUI = Instance.new("ScreenGui")
+local TextLabel = Instance.new("TextLabel")
+local LOGS_FRAME = Instance.new("Frame")
+local ScrollingFrame = Instance.new("ScrollingFrame")
+local LOG_LABEL = Instance.new("TextLabel")
+local LETZTE_LABEL = Instance.new("TextLabel")
+local SCHLIESEN2_BUTTON = Instance.new("TextButton")
+HAUPT_GUI.Name = "HAUPT_GUI"
+HAUPT_GUI.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+TextLabel.Parent = HAUPT_GUI
+TextLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+TextLabel.Visible = true
+TextLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TextLabel.BorderSizePixel = 0
+TextLabel.Position = UDim2.new(0.0674404055, 0, 0.379681021, 0)
+TextLabel.Size = UDim2.new(0, 365, 0, 20)
+TextLabel.Font = Enum.Font.Unknown
+TextLabel.Text = "Output"
+TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel.TextScaled = true
+TextLabel.TextSize = 14.000
+TextLabel.TextWrapped = true
+TextLabel.TextXAlignment = Enum.TextXAlignment.Left
+LOGS_FRAME.Name = "LOGS_FRAME"
+LOGS_FRAME.Parent = TextLabel
+LOGS_FRAME.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+LOGS_FRAME.BorderColor3 = Color3.fromRGB(0, 0, 0)
+LOGS_FRAME.BorderSizePixel = 0
+LOGS_FRAME.Position = UDim2.new(0, 0, 0.999999225, 0)
+LOGS_FRAME.Size = UDim2.new(0, 365, 0, 182)
+ScrollingFrame.Parent = LOGS_FRAME
+ScrollingFrame.Active = true
+ScrollingFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ScrollingFrame.BorderSizePixel = 0
+ScrollingFrame.Size = UDim2.new(0, 365, 0, 137)
+ScrollingFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+LOG_LABEL.Name = "LOG_LABEL"
+LOG_LABEL.Parent = ScrollingFrame
+LOG_LABEL.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+LOG_LABEL.BorderColor3 = Color3.fromRGB(0, 0, 0)
+LOG_LABEL.BorderSizePixel = 0
+LOG_LABEL.Size = UDim2.new(0, 351, 0, 700)
+LOG_LABEL.Font = Enum.Font.SourceSansBold
+LOG_LABEL.TextColor3 = Color3.fromRGB(0, 135, 0)
+LOG_LABEL.TextSize = 17.000
+LOG_LABEL.TextXAlignment = Enum.TextXAlignment.Left
+LOG_LABEL.TextYAlignment = Enum.TextYAlignment.Top
+LOG_LABEL.TextWrapped = true
+LETZTE_LABEL.Name = "LETZTE_LABEL"
+LETZTE_LABEL.Parent = LOGS_FRAME
+LETZTE_LABEL.BackgroundColor3 = Color3.fromRGB(38, 38, 38)
+LETZTE_LABEL.BorderColor3 = Color3.fromRGB(0, 0, 0)
+LETZTE_LABEL.BorderSizePixel = 0
+LETZTE_LABEL.Position = UDim2.new(0, 0, 0.846153855, 0)
+LETZTE_LABEL.Size = UDim2.new(0, 365, 0, 28)
+LETZTE_LABEL.Font = Enum.Font.SourceSansBold
+LETZTE_LABEL.TextColor3 = Color3.fromRGB(0, 112, 0)
+LETZTE_LABEL.TextSize = 20.000
+LETZTE_LABEL.TextXAlignment = Enum.TextXAlignment.Left
+SCHLIESEN2_BUTTON.Name = "SCHLIESEN2_BUTTON"
+SCHLIESEN2_BUTTON.Parent = TextLabel
+SCHLIESEN2_BUTTON.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+SCHLIESEN2_BUTTON.BorderColor3 = Color3.fromRGB(0, 0, 0)
+SCHLIESEN2_BUTTON.BorderSizePixel = 0
+SCHLIESEN2_BUTTON.Position = UDim2.new(0.819178104, 0, 7.62939464e-07, 0)
+SCHLIESEN2_BUTTON.Size = UDim2.new(0, 66, 0, 20)
+SCHLIESEN2_BUTTON.Font = Enum.Font.SourceSansBold
+SCHLIESEN2_BUTTON.Text = "Close"
+SCHLIESEN2_BUTTON.TextColor3 = Color3.fromRGB(0, 0, 0)
+SCHLIESEN2_BUTTON.TextScaled = true
+SCHLIESEN2_BUTTON.TextSize = 14.000
+SCHLIESEN2_BUTTON.TextWrapped = true
+
+SCHLIESEN2_BUTTON.MouseButton1Click:Connect(function()HAUPT_GUI:Destroy()end)
+local function makeDraggable(gui)
+	local UserInputService = game:GetService("UserInputService")
+	local dragging
+	local dragInput
+	local dragStart
+	local startPos
+	local function update(input)local delta=input.Position-dragStart gui.Position=UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)end
+	gui.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true dragStart = input.Position startPos = gui.Position
+			input.Changed:Connect(function()if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
+		end
+	end)
+	gui.InputChanged:Connect(function(input)if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end end)
+	UserInputService.InputChanged:Connect(function(input)if input == dragInput and dragging then update(input)end end)
+end
+makeDraggable(TextLabel)
+local settings
+settings = {
+	_toggle = true,
+	_tunedOutUsers = {},
+	_version = "1.2",
+	_defaultCooldown = 2,
+	_maxDistance = 12,
+	_prefix = ">",
+	_api_wetter_schluessel = "47806c7e7715ba692c217a32957b14f2"
+}
+local locked = false
+local toggle = settings._toggle
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+repeat task.wait() until LocalPlayer.Character
+local vers = TextChatService.ChatVersion
+if vers == Enum.ChatVersion.TextChatService then channel = TextChatService:FindFirstChild("TextChannels"):FindFirstChild("RBXGeneral")mode = 1 else mode = 2 end
+local function sendMessage(message)
+	if mode == 1 then 
+		channel:SendAsync(message)
+	elseif mode == 2 then 
+		game.ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(message, "All")
+	end 
+end
+local function cooldown(amount)
+	if amount then 
+		toggle = false 
+		wait(amount)
+		toggle = true 
+	else 
+		toggle = false 
+		wait(settings._defaultCooldown)
+		toggle = true 
+	end 
+end
+local chatHistory = {}
+local function logs(message)
+	LOG_LABEL.Text = table.concat(chatHistory, "\n")
+	ScrollingFrame.CanvasPosition = Vector2.new(0, (LOG_LABEL.TextBounds.Y) - 120)
+	table.insert(chatHistory, message)
+	LETZTE_LABEL.Text = "ENTERED>"..message
+	while #chatHistory > 200 do 
+		table.remove(chatHistory, 1)
+	end 
+	LOG_LABEL.Text = table.concat(chatHistory, "\n> ")
+end
+local function combined(message)sendMessage(message)logs("BOT RESPONSE: "..message)print("Player Entered: "..message)end
+local function findeWetter(stadt)
+	local url = "http://api.openweathermap.org/data/2.5/weather?q="..stadt.."&appid="..settings._api_wetter_schluessel
+	local ergebnis = HttpService:GetAsync(url)
+	return HttpService:JSONDecode(ergebnis)
+end
+local function Wetter(stadt)
+	local wetterDaten = findeWetter(stadt)
+	if wetterDaten then
+		local temperatur = wetterDaten.main.temp
+		local beschreibung = wetterDaten.weather[1].description
+		print("DEBUG "..temperatur.."	"..beschreibung)
+		return "City: "..stadt..". Temp: "..temperatur..". "..beschreibung
+	else return "Failed to get weather data or city name is invalid."end
+end
+local prefix = "!"
+local commands
+commands = {
+	["ee"] = function(player)
+		if player.Name == "Scripter_learnsLuau" then
+			print("ANUS")
+			combined("Test Successful")
+		else combined("You are not allowed to use this cmd")end
+	end,
+	["lock"] = function(player)
+		if player.Name == "Scripter_learnsLuau" then
+			locked = true
+			sendMessage("Bot has been locked.")
+		end
+	end,
+	["prefix"] = function(player, target)
+		if player.Name == "Scripter_learnsLuau" then
+			prefix = target
+			combined("Prefix changed to: "..target)
+		else combined("You are not allowed to use this cmd")end
+	end,
+	["help"] = function(player)combined("This is a Test Bot made by the RES.Q. We are not focusing on something.")end,
+	["cmds"] = function(player)combined("PREFIX: "..prefix.."help, ee, prefix, ask, weather")end,
+	["weather"] = function(player, argument)
+		if argument then local wetter = Wetter(argument)sendMessage(wetter)
+		else sendMessage("Argument required: Please include a city name in your message!")end
+	end,
+}
+local function handleCommandInput(command)
+	command = command:sub(#prefix + 1)
+	local splitMessage = command:lower():split(" ")
+	local commandName = splitMessage[1]
+	local argument = splitMessage[2]
+	local success, err = pcall(function()
+		if commands[commandName]then 
+			commands[commandName](game.Players.LocalPlayer, argument)
+			logs("ENTERED: "..commandName)
+			return print("executed: "..command)
+		else return sendMessage("Command not found.") end
+	end)
+	if not success then print(err)end
+end
+local filterCooldown = false
+if mode == 1 and locked == false then
+	TextChatService.OnIncomingMessage = function(message)
+		if message.Status == Enum.TextChatMessageStatus.Success then
+			local target = message.TextSource
+			local character = Players:FindFirstChild(target.Name).Character
+			local hrp = character:WaitForChild("HumanoidRootPart")
+			local messageString = message.Text
+			if (hrp.Position - HumanoidRootPart.Position).Magnitude > settings._maxDistance then return end
+			local username = target.Name
+			if username == LocalPlayer.Name then
+				if string.find(message, "##") and filterCooldown == false then
+					filterCooldown = true
+					sendMessage("Message Filtered")
+					task.wait(5)
+					filterCooldown = false
+				end
+				return
+			end
+			if toggle == true and messageString:sub(1, #prefix) == prefix then
+				task.wait(0.1)
+				handleCommandInput(messageString)
+				cooldown()
+			end
+		end
+	end
+elseif mode == 2 and locked == false then
+	game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.OnMessageDoneFiltering.OnClientEvent:Connect(function(message)
+		local userName = message.FromSpeaker
+		local target = Players:FindFirstChild(tostring(userName))
+		local character = target.Character
+		local hrp = character:WaitForChild("HumanoidRootPart")
+		if (hrp.Position - HumanoidRootPart.Position).Magnitude > settings._maxDistance then return end
+		local userName = target.Name
+		if userName == LocalPlayer.Name then
+			if string.find(message, "##") and filterCooldown == false then
+				filterCooldown = true
+				sendMessage("Message Filtered")
+				task.wait(5)
+				filterCooldown = false
+			end
+			return
+		end
+		local msgString = message.Message
+		if toggle == true and msgString:sub(1, #prefix) == prefix then
+			task.wait(0.1)
+			handleCommandInput(msgString)
+			cooldown()
+		end
+	end)
+end
